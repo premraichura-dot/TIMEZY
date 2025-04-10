@@ -3,291 +3,37 @@
 <head>
   <meta charset="UTF-8" />
   <title>Timezy</title>
-  <link href="https://fonts.googleapis.com/css2?family=Quicksand:wght@400;600;700&display=swap" rel="stylesheet">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <style>
-    * {
-      margin: 0;
-      padding: 0;
-      box-sizing: border-box;
-      font-family: 'Quicksand', sans-serif;
-    }
     body {
+      font-family: sans-serif;
       background: linear-gradient(to right, #667eea, #764ba2);
-      color: #fff;
-      font-size: 18px;
-      padding: 30px;
-      line-height: 1.6;
+      color: white;
+      text-align: center;
+      padding: 50px;
     }
     h1 {
-      text-align: center;
       font-size: 48px;
-      font-weight: 700;
-      margin-bottom: 30px;
-      color: #ffffff;
-      text-shadow: 1px 1px 3px rgba(0,0,0,0.3);
-    }
-    input, button {
-      font-size: 18px;
-      padding: 10px;
-      border-radius: 8px;
-      border: none;
-      outline: none;
-      margin-top: 5px;
-    }
-    input[type="date"], input[type="number"], input[type="text"] {
-      width: 200px;
-      max-width: 90%;
-      border: 2px solid #ddd;
-    }
-    button {
-      background-color: #ffffff;
-      color: #333;
-      cursor: pointer;
-      transition: background 0.3s ease;
-    }
-    button:hover {
-      background-color: #e2e2e2;
-    }
-    .section {
-      background-color: rgba(255,255,255,0.1);
-      padding: 20px;
-      margin-top: 30px;
-      border-radius: 12px;
-      box-shadow: 0 5px 10px rgba(0,0,0,0.2);
+      margin-bottom: 20px;
     }
     #currentTime {
-      position: absolute;
-      top: 20px;
-      right: 30px;
-      font-size: 20px;
-      font-style: normal;
-      font-weight: 600;
-      color: #ffffff;
-    }
-    #stopButton {
-      margin-top: 15px;
-      display: none;
-      background-color: #ff4d4d;
-      color: #fff;
-    }
-    .dynamic-clock {
-      margin: 10px 0;
-      padding: 12px;
-      background-color: rgba(255, 255, 255, 0.9);
-      color: #000;
-      border-radius: 12px;
-      box-shadow: 0 0 8px rgba(0,0,0,0.2);
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-    }
-    .dynamic-clock button {
-      font-size: 16px;
-      background-color: transparent;
-      border: none;
-      color: #ff4d4d;
-      cursor: pointer;
-    }
-    p {
-      margin-bottom: 10px;
-      font-weight: 600;
-    }
-    #clocksContainer {
-      margin-top: 15px;
+      font-size: 24px;
+      margin-top: 10px;
+      font-weight: bold;
     }
   </style>
 </head>
 <body>
-  <div id="currentTime"></div>
-
   <h1>Timezy</h1>
-
-  <div class="section">
-    <p>How Long Since...</p>
-    <label>Choose Date:
-      <input type="date" id="sinceDate">
-    </label>
-    <br><br>
-    <strong>Result:</strong> <span id="sinceResult"></span>
-  </div>
-
-  <div class="section">
-    <p>Countdown</p>
-    <label>Minutes:
-      <input type="number" id="cdMin" min="0">
-    </label>
-    <label> Hours:
-      <input type="number" id="cdHour" min="0">
-    </label>
-    <label> Seconds:
-      <input type="number" id="cdSec" min="0">
-    </label>
-    <br><br>
-    <button onclick="startCountdown()">Start Countdown</button>
-    <br><br>
-    <strong>Result:</strong> <span id="countdownDisplay"></span>
-    <br>
-    <button id="stopButton" onclick="stopAlarm()">Stop Alarm</button>
-    <audio id="alarmSound">
-      <source src="https://actions.google.com/sounds/v1/alarms/alarm_clock.ogg" type="audio/ogg">
-    </audio>
-  </div>
-
-  <div class="section">
-    <p>World Clock:</p>
-    <input type="text" id="timezoneInput" placeholder="e.g. Asia/Kolkata" />
-    <button onclick="addCityClock()">Add City</button>
-    <div id="clocksContainer"></div>
-  </div>
+  <div id="currentTime">Loading...</div>
 
   <script>
-    const sinceDate = document.getElementById('sinceDate');
-    const sinceResult = document.getElementById('sinceResult');
-
-    function updateSince() {
-      const dateValue = sinceDate.value;
-      if (!dateValue) {
-        sinceResult.textContent = "Please enter a valid date";
-        return;
-      }
-      const [year, month, day] = dateValue.split("-").map(Number);
-      const past = new Date(year, month - 1, day);
+    function updateTime() {
       const now = new Date();
-
-      if (past > now) {
-        sinceResult.textContent = "Invalid input!";
-        return;
-      }
-
-      let years = now.getFullYear() - past.getFullYear();
-      let months = now.getMonth() - past.getMonth();
-      let days = now.getDate() - past.getDate();
-
-      if (days < 0) {
-        months--;
-        const prevMonth = new Date(now.getFullYear(), now.getMonth(), 0);
-        days += prevMonth.getDate();
-      }
-
-      if (months < 0) {
-        years--;
-        months += 12;
-      }
-
-      sinceResult.textContent = `${years} years, ${months} months, and ${days} days ago`;
+      document.getElementById("currentTime").textContent = "Current Time: " + now.toLocaleTimeString();
     }
-
-    sinceDate.addEventListener("input", updateSince);
-
-    const cdMin = document.getElementById("cdMin");
-    const cdHour = document.getElementById("cdHour");
-    const cdSec = document.getElementById("cdSec");
-    const display = document.getElementById("countdownDisplay");
-    const alarm = document.getElementById("alarmSound");
-    const stopButton = document.getElementById("stopButton");
-
-    let countdownInterval;
-    let vibrationInterval;
-
-    function startCountdown() {
-      clearInterval(countdownInterval);
-      stopAlarm();
-      let totalSeconds = (+cdHour.value) * 3600 + (+cdMin.value) * 60 + (+cdSec.value);
-
-      countdownInterval = setInterval(() => {
-        if (totalSeconds <= 0) {
-          clearInterval(countdownInterval);
-          display.textContent = "Time's up!";
-          alarm.play();
-          stopButton.style.display = "inline-block";
-          if (navigator.vibrate) {
-            vibrationInterval = setInterval(() => navigator.vibrate([500]), 1000);
-          }
-        } else {
-          const h = Math.floor(totalSeconds / 3600);
-          const m = Math.floor((totalSeconds % 3600) / 60);
-          const s = totalSeconds % 60;
-          display.textContent = `${h}h ${m}m ${s}s`;
-          totalSeconds--;
-        }
-      }, 1000);
-    }
-
-    function stopAlarm() {
-      alarm.pause();
-      alarm.currentTime = 0;
-      stopButton.style.display = "none";
-      if (navigator.vibrate) {
-        navigator.vibrate(0);
-        clearInterval(vibrationInterval);
-      }
-    }
-
-    function updateCurrentTime() {
-      const now = new Date();
-      const formatted = now.toLocaleTimeString('en-US', { hour12: true });
-      document.getElementById("currentTime").textContent = `Current Time: ${formatted}`;
-    }
-
-    const clocksContainer = document.getElementById("clocksContainer");
-    const timezoneInput = document.getElementById("timezoneInput");
-    let dynamicClocks = [];
-
-    function addCityClock() {
-      const timezone = timezoneInput.value.trim();
-      if (!timezone) return;
-
-      const id = `clock-${Date.now()}`;
-      const clockBox = document.createElement("div");
-      clockBox.className = "dynamic-clock";
-      clockBox.id = id;
-
-      const label = document.createElement("span");
-      label.textContent = `${timezone}: `;
-
-      const timeSpan = document.createElement("span");
-      timeSpan.className = "time-span";
-
-      const removeBtn = document.createElement("button");
-      removeBtn.textContent = "❌";
-      removeBtn.onclick = () => {
-        clocksContainer.removeChild(clockBox);
-        dynamicClocks = dynamicClocks.filter(c => c.id !== id);
-      };
-
-      clockBox.appendChild(label);
-      clockBox.appendChild(timeSpan);
-      clockBox.appendChild(removeBtn);
-      clocksContainer.appendChild(clockBox);
-
-      dynamicClocks.push({ id, timezone, element: timeSpan });
-      timezoneInput.value = '';
-    }
-
-    function updateDynamicClocks() {
-      const now = new Date();
-      dynamicClocks.forEach(clock => {
-        try {
-          const time = now.toLocaleTimeString("en-US", {
-            timeZone: clock.timezone,
-            hour: '2-digit',
-            minute: '2-digit',
-            second: '2-digit',
-            hour12: true
-          });
-          clock.element.textContent = time;
-        } catch {
-          clock.element.textContent = "Invalid timezone!";
-        }
-      });
-    }
-
-    setInterval(() => {
-      updateCurrentTime();
-      updateDynamicClocks();
-    }, 1000);
-
-    updateCurrentTime();
+    setInterval(updateTime, 1000);
+    updateTime();
   </script>
 </body>
 </html>
